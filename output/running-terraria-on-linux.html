@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Running Terraria on Linux | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Running Terraria on Linux</h1>
+    <p class=date> Mar 11, 2015 </p>
+    <p>After a significant amount of issues I finally was able to get Terraria running on Linux using <code>wine-staging</code>. <code>wine-staging</code> is <code>wine</code> with more bugfixes. It is not a stable version of <code>wine</code> but it is stable enough and has improved features.</p>
+<p>I use Arch Linux so instructions will apply to my particular installation. I cannot guarantee this will work on other distros, although I hope it will. </p>
+<p><img alt="screenfetch" src="/content/images/2015/03/Screenshot-from-2015-03-11-15-33-26.png" /></p>
+<p>First you need to install <code>winetricks</code> and <code>wine-staging</code>. </p>
+<div class="highlight"><pre><span class="nv">$ </span>wget http://winetricks.org/winetricks
+<span class="nv">$ </span>chmod +x winetricks
+<span class="nv">$ </span>sudo cp winetricks /usr/bin
+</pre></div>
+
+
+<p>For <code>wine-staging</code> follow the <a href="https://github.com/wine-compholio/wine-staging/wiki/Installation">documented installation steps</a> for your distribution. Then add it to your path.</p>
+<div class="highlight"><pre><span class="nv">$ PATH</span><span class="o">=</span><span class="nv">$PATH</span>:/opt/wine-staging/bin
+</pre></div>
+
+
+<p>Now we need to install dependencies for Terraria. Please follow these steps exactly. Assuming you followed the prior steps correctly this will work.</p>
+<div class="highlight"><pre><span class="nv">$ WINEPREFIX</span><span class="o">=</span>~/.wine32 <span class="nv">WINEARCH</span><span class="o">=</span>win32 winetricks dotnet40
+<span class="nv">$ WINEPREFIX</span><span class="o">=</span>~/.wine32 winetricks xna40
+</pre></div>
+
+
+<p>Now download and install the <a href="http://media.steampowered.com/client/installer/SteamSetup.exe">Windows version of Steam</a>.</p>
+<div class="highlight"><pre><span class="nv">$ WINEPREFIX</span><span class="o">=</span>~/.wine32 wine path/to/steam/executable/SteamSetup.exe
+</pre></div>
+
+
+<p>When it is finished don't run Steam. If you do run Steam it won't have any text. To run Steam do the following:</p>
+<div class="highlight"><pre><span class="nv">$ WINEPREFIX</span><span class="o">=</span>~/.wine32 wine ~/.wine32/drive_c/Program<span class="se">\ </span>Files/Steam/Steam.exe -no-dwrite
+</pre></div>
+
+
+<p>Now download and install Terraria within Steam. After this is done you can play Terraria! If you are used to playing on Windows the game content is saved to <code>My Games/Terraria</code>. With wine this <code>My Games</code> folder is in your user's home directory (<code>~/My\ Games</code>), so if you want to fiddle with world or character files that is the place to check. </p>
+<p>I have not tried running Terraria from within Steam. I have been running it directly through wine.</p>
+<div class="highlight"><pre><span class="nv">$ WINEPREFIX</span><span class="o">=</span>~/.wine32 wine ~/.wine32/drive_c/Program<span class="se">\ </span>Files/Steam/steamapps/common/Terraria/Terraria.exe
+</pre></div>
+
+
+<p>If you did everything correctly it should be working! Make sure to ALWAYS use <code>WINEPREFIX=~/.wine32</code> when working with this wine installation. It makes it work on a 64-bit system. <code>winetricks</code> uses <code>wine</code> under the hood so make sure to specify the <code>WINEPREFIX</code> there as well.</p>
+<h3>Other issue</h3>
+<p>Currently I have no sound from the game. This is a known issue. See <a href="https://appdb.winehq.org/objectManager.php?sClass=version&amp;iId=24915">this</a> post and look for the issue called "No sound". There are possible fixes but they have not worked for me. If you run into this same issue please check that link and follow the possible fixes there.</p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/how-to.html">how-to</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

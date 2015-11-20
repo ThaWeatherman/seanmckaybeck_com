@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Visualizing Twitter data | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Visualizing Twitter data</h1>
+    <p class=date> Aug 22, 2014 </p>
+    <p>Data visualization is awesome. Who doesn't enjoy looking at cool graphs of various data? </p>
+<p>I decided to capitalize on the recent events in Ferguson, MO and practice my data crunching skills by looking at patterns in words used in tweets. I am still fairly new to the data science field so this was an exercise to get my feet wet. </p>
+<h2>Keywords are easy</h2>
+<p>I began with simple keyword searches. I was watching Jurassic Park and it was late so I did not want to stretch my brain further than it was capable. </p>
+<p>After watching the Twitter feed for <code>#Ferguson</code> for some time I decided on a few words that seemed to come up often or that seemed relevant. </p>
+<div class="highlight"><pre>white
+racist
+ftp
+tear gas
+rifle
+camera
+milk
+loot
+</pre></div>
+
+
+<p>Yes lots of other words are missing such as <code>black</code> but this was good enough to get a feel for what I was doing. </p>
+<p>In order to interact with Twitter I used a Python module called <code>tweepy</code>. <code>tweepy</code> seems to be one of the more popular choices by Pythonistas and it is easy to use. </p>
+<p><code>tweepy</code> provides a class for listening to Twitter streams. This allows for real time monitoring of whatever keywords your heart desires. Using it is as simple as creating a subclass of <code>tweepy.StreamListener</code> and carrying out the desired behavior when a tweet is seen. I wanted it to count the total number of tweets seen and the count of each word as it is seen. </p>
+<p>This is the result.</p>
+<script src="https://gist.github.com/ThaWeatherman/9a2151fcf23bf66844d0/fe2dcfe9904f527121956c8c7cb0e948c76d1694.js"></script>
+
+<p>It is by no means elegant (remember, the velociraptors were hunting everyone at this point), but it does the job. A cleaner solution would have contained the keywords in a list and had a dictionary to track the counts. Printing would have been cleaner this way as well. </p>
+<p>The script itself is simple. When a tweet is seen it checks for the desired words and if a word is found that word's count is incremented. Then the total counts are printed for viewing. </p>
+<p>I let this script run for 12 hours and the final result was the following. </p>
+<div class="highlight"><pre>----------GOT A TWEET-----------
+total is 314259
+number with &#39;racist&#39; is 2933
+number with &#39;white&#39; is 10230
+number with &#39;ftp&#39; is 624
+number with &#39;tear gas&#39; is 2207
+number with &#39;rifle&#39; is 1140
+number with &#39;camera&#39; is 1735
+number with &#39;milk&#39; is 569
+number with &#39;loot&#39; is 2508
+--------------------------------
+</pre></div>
+
+
+<p>Not a bad first attempt! But I can do better than just keyword searches. </p>
+<h2>Track all the words!</h2>
+<p>It is more interesting to see which words <em>actually</em> appear the most rather than guessing which ones <em>might</em> appear the most. </p>
+<p>Instead of tracking keywords we have our custom stream listener store a dictionary mapping words to the number of times they appear in tweets. We do not want to track words like "the" or "an" so we make sure to filter those out. We also do not want to track URLs for this specific experiment so we filter those out as well. However it would be interesting to look at which links are shared the most in a different experiment. Finally we filter out usernames. </p>
+<p>Since the stream is constantly running we need a way to save the data. Ideally we would save the data every minute or so, but for now saving it when the script stops running is good enough. </p>
+<p>The final result is the following. </p>
+<script src="https://gist.github.com/ThaWeatherman/9a2151fcf23bf66844d0.js?file=analyze.py"></script>
+
+<p>Note that since everything is stored in memory you should not let this script run for more than a few hours unless you have a lot of memory to work with.</p>
+<p>Having all of this data is cool, but visualizations are even more cool. I decided to use word clouds to give an idea of which words appear the most frequently. </p>
+<p>I began with a 15 minute test run of the script. Unfortunately I do not have the total number of tweets seen, but the result is about what you would expect. </p>
+<p><img alt="15 minute run" src="/content/images/2014/Aug/example_cloud.png" /></p>
+<p>Some words I did not expect showed up such as "nacional" (is that a word?), "livingblessed", and "mirror". Either way it worked so now it was time to do a longer run.</p>
+<h3>The final result</h3>
+<p>Because of the dataset size and file size limits on the web services I used for making the word clouds I only let it run for two hours. The final JSON file was about 1.1 MB, and after converting it to a giant block of text for feeding to the word cloud generators it was ~5.2 MB. This was too large so I ignored words with counts less than 10 and removed "ferguson", bringing the size down to ~4.2 MB. In total the script saw 64845 tweets. </p>
+<p>This one is from <a href="http://www.wordle.net/create">Wordle</a>.
+<img alt="wordle final" src="/content/images/2014/Aug/final_cloud.png" /></p>
+<p>This one is from <a href="http://www.jasondavies.com/wordcloud/#%2F%2Fwww.jasondavies.com%2Fwordtree%2Fcat-in-the-hat.txt">Jason Davies</a>.
+<img alt="tag crowd final" src="/content/images/2014/Aug/download.png" /></p>
+<p>I also used <a href="http://tagcrowd.com/">Tag Crowd</a>, but I liked these two the best with Wordle being my favorite. </p>
+<p>The words are pretty much the same as those from the 15 minute run. </p>
+<p>From this data we can see the general feeling towards the events in Ferguson and we can gain an understanding of the most talked about events or people. Data analysis helps open the door to understanding the big picture and this simple word analysis in only the beginning!</p>
+<h4>Materials used</h4>
+<ul>
+<li>pip</li>
+<li>tweepy</li>
+<li>virtualenv</li>
+<li>Python 2.7.5</li>
+<li>Wordle</li>
+</ul>
+<p>See all of it <a href="https://gist.github.com/ThaWeatherman/9a2151fcf23bf66844d0">here on Github</a>. </p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/data-science.html">data-science</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

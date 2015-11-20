@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Simple Display | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Simple Display</h1>
+    <p class=date> Mar 02, 2015 </p>
+    <p>I made a basic setup that displays the current price of silver per ounce.</p>
+<h6>Materials</h6>
+<ul>
+<li>1 Raspberry Pi model B</li>
+<li><a href="https://www.adafruit.com/products/420">1 16x32 display from Adafruit</a></li>
+<li>13 female/female jumper wires</li>
+<li><a href="https://www.adafruit.com/products/276">1 5V 2A DC power supply</a></li>
+<li><a href="https://www.adafruit.com/products/368">1 female DC power adapter</a></li>
+</ul>
+<p>I used the Arch Linux image for the Raspberry Pi's operating system. Follow <a href="https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/wiring-the-display">this</a> guide for wiring the display to the Pi. Once you have the operating system set up you need the proper software. Use <a href="https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/testing">this</a> guide for installing the necessary software for the display. In order to work with my code you need Python 3.4 and you need <code>libfreetype</code> installed. On Arch you can install it with <code>pacman -S freetype2</code>. You will also need <code>Pillow</code> which can be installed with <code>pip install pillow</code>. Make sure you install <code>libfreetype</code> before <code>pillow</code>. The font used in the code is also based on the path on Arch.</p>
+<h6>The Code</h6>
+<p>Note that this must be saved and run from within the install directory of the matrix code. Every ten minutes it will grab the current price per ounce of silver, create a <code>ppm</code> image in the specified font, then display it as a scrolling message on the LED matrix.</p>
+<script src="https://gist.github.com/ThaWeatherman/08a4bac104601e8e3fb1.js"></script>
+
+<p>Note that a good chunk of this (the display code) was taken from the Adafruit tutorial.</p>
+<h6>The Result</h6>
+<p>I can't get the Imgur gifv or Gfycat images to embed properly here so below are the links (higher quality is better!).</p>
+<p>http://gfycat.com/GrotesqueImpishDrafthorse
+http://i.imgur.com/vXqUxLG.gifv</p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/electronics.html">electronics</a>
+      <a href="/tag/raspberry-pi.html">raspberry-pi</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

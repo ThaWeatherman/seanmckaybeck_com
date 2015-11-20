@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Ensuring PEP 8 compliance using Git hooks | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Ensuring PEP 8 compliance using Git hooks</h1>
+    <p class=date> Aug 20, 2014 </p>
+    <p>PEP 8 is the Python language's style guide. It is accepted by the community as the best standards for any Python code. <code>Pylint</code> is a program for checking Python style. We can ensure all of our Python code is clean and elegant using Git hooks. </p>
+<h2>What are hooks?</h2>
+<p>Git hooks are essentially scripts that run before or after you perform various actions in <code>git</code>. Some examples are a script that runs before a commit, after a commit, or after a merge. These scripts are stored in a repository's <code>.git/hooks</code> folder. They can be written in a variety of languages but are most commonly written in Bash, Python, Ruby, or Perl.</p>
+<h2>PEP 8 Compliance</h2>
+<p>We can check our code for compliance using <code>pylint</code> and <code>pep8</code>. To install these use the following commands. </p>
+<div class="highlight"><pre>pip install pep8
+apt-get install pylint
+</pre></div>
+
+
+<p>You may also need to use <code>sudo</code> if you are not the root user when executing these commands. If you are on a Red Hat based linux system use <code>yum</code> instead of <code>apt-get</code>. If you are on OS X or Windows then <a href="http://lmgtfy.com/?q=how+to+install+linux">go do some Googling</a>. </p>
+<h2>Step 1: The script</h2>
+<p>Before we can do anything we need to write our script. It needs to check each Python source file against <code>pep8</code> followed by <code>pylint</code>. If <code>pep8</code> finds any errors or if <code>pylint</code> has a score less than 9.00/10 it should exit with a failed status code. You can decide what score your code should pass with in <code>pylint</code>, but I like 9/10 as it means the code is near perfect. Ideally it would pass with 10/10 but sometimes that just is not possible. </p>
+<script src="https://gist.github.com/ThaWeatherman/f7ae231e85d74b62e049.js?file=pre-commit"></script>
+
+<p>This is our final script. It is a little rough around the edges but I had to do some hacky things to extract the <code>pylint</code> score.</p>
+<h2>Step 2: Add it to your repo</h2>
+<p>Now that we have a working script we need the git repository to recognize the hook. Make your script executable using</p>
+<blockquote>
+<p>chmod 744 pre-commit</p>
+</blockquote>
+<p>where <code>pre-commit</code> is the name of your script. Now move it to the repository's <code>.git/hooks</code> folder and it is good to go! Note that for every repository you want to use this hook in you must add this script.</p>
+<h2>Step 3: Commit as normal</h2>
+<p>You can test that it works by trying to do a commit. Because it is the <code>pre-commit</code> script it will run before the commit is finalized. If it passes then the code is committed, otherwise it will fail and tell you why it failed. </p>
+<p>You can use the following example code to demonstrate that it works. The first file is a fully compliant example while the other is vile. Initialize a git repo, add the <code>pre-commit</code> script and these two files, then try a commit and see what happens. </p>
+<script src="https://gist.github.com/ThaWeatherman/f7ae231e85d74b62e049.js?file=good.py"></script>
+
+<script src="https://gist.github.com/ThaWeatherman/f7ae231e85d74b62e049.js?file=bad.py"></script>
+
+<h2>Additional reading</h2>
+<p>If you would like to understand each of these topics better please read through the following links. </p>
+<ul>
+<li><a href="http://githooks.com/">Git hooks</a></li>
+<li><a href="http://legacy.python.org/dev/peps/pep-0008/">PEP 8</a> the style guide</li>
+<li><a href="http://legacy.python.org/dev/peps/pep-0257/">PEP 257</a> docstring conventions</li>
+<li><a href="http://legacy.python.org/dev/peps/pep-0020/">PEP 20</a> Zen of Python</li>
+</ul>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

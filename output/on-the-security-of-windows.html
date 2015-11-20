@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> On the Security of Windows | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> On the Security of Windows</h1>
+    <p class=date> Mar 15, 2014 </p>
+    <p>No, not Microsoft Windows. I'm talking about the actual windows on your house or apartment. If you have sliding windows with a screen on the outside, this is applicable to you. </p>
+<h2>Backstory</h2>
+<p>My freshman year at BYU a friend taught me how to break into my dorm room through the window if I ever got locked out. In fact, even if the window was <strong>locked</strong> I could still get in. It proved to be a useful trick as I managed to forget my room key often. It also was useful in a few pranks my friends and I pulled that required entrance to someone else's room. </p>
+<p>After I got back from Samoa I had not kicked the habit of forgetting my house key. Thankfully my new apartment had the same kind of windows my freshman dorm room sported, so my bad habit did not inhibit me. </p>
+<p>The other day I decided to walk home from campus. As I was walking my wife reminded me I didn't have a key, and she was nowhere near home, so I was locked out. I went home anyways and planned on sitting outside until she came home. When I got home I realized my windows were the same as those I am used to exploiting, and I remembered I had left the window unlocked. My apartment is on the second floor so it was tricky, but after dangling from the window ledge for a minute I was able to get inside. I have since fixed the problem. </p>
+<h2>The Exploit</h2>
+<p>The main reason this is so easy to do is the window screen. The screen is designed to be removed from the outside. It also has notches on the corners that make it easy to grip (although this is not necessary as it is still fairly easy to grip without the notches). With some wiggling the screen pops out easily and you now only have a sliding window in your way. </p>
+<p>If the window is unlocked you simply slide it open. Then you just have to dodge the blinds and you are in. If the window is locked and allows for it, you can still get in. By pushing in and up on the window you essentially unlock the window and can then slide it open, although it is crooked when you do it. This exploits the extra space along the top of the window. </p>
+<h3>A Walk-through</h3>
+<p><img alt="Notches" src="/content/images/2014/Mar/2014_03_14_17_20_41-2.jpg" /></p>
+<p>Gripping these notches makes popping the screen out a simple task. </p>
+<p><img alt="Pop it" src="/content/images/2014/Mar/2014_03_14_17_12_06.jpg" /></p>
+<p>I push the screen to the right and pull out and it pops out with ease. </p>
+<p><img alt="Slide it open" src="/content/images/2014/Mar/2014_03_14_17_21_22.jpg" /></p>
+<p>The window is unlocked so I can slide it open without any issue. However if it were locked I would push in and up and could then slide the window open. After dangling on the ledge I can get in!</p>
+<h2>The Fix</h2>
+<p>There are simple fixes for this issue. The easiest is to put a wooden rod along the area where the window slides. An attacker can't get in without breaking the whole window and making a lot of noise, which is not ideal for the attacker. However this is a bandaid over the real problem. </p>
+<p>The first step in fixing this is to remove the wiggle room along the top of the window. This prevents an attacker from opening the window when it is locked. </p>
+<p>Another fix is what my apartment complex does. They put two little bars along the top of the empty space above the window. When you push up the window is stuck against the bars and you can't circumvent the lock. </p>
+<p><img alt="The bars" src="/content/images/2014/Mar/2014_03_14_17_21_59.jpg" /></p>
+<p>The second step is making the screen only accessible from the inside. If the screen can only be removed from the inside the attacker would have to cut through the screen and then mount an attack on the sliding window. This slows down entry time which is not desirable for an attacker. </p>
+<p>If you have windows like this currently you should see if it is possible to apply these fixes. If not just use the bandaid solution, and the next time you put in a sliding window make sure it is done right. </p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/security.html">security</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>

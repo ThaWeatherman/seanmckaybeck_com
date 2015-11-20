@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="">
+    <meta name="author" content="Sean Beck">
+
+    <title> Dynamically Building a Class | Show Me the Code </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="shortcut icon" href="/theme/images/favicon.ico">
+  </head>
+  <body>
+    <div class=container>
+<div class="header">
+    <a href="/index.html">Show Me the Code</a> <span class="muted"></span>
+</div>
+
+<div class=navigation>
+    <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+            <li><a href="/about.html">About</a> </li>
+    </ul>
+</div>
+<div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Dynamically Building a Class</h1>
+    <p class=date> Jul 18, 2015 </p>
+    <p>I recently ran into a situation where a class I was writing was getting a bit hard to manage. The source file was getting so long and I got sick of scrolling back and forth through it to get to the functions I needed. Surely there must be a way to remedy this inconvenient situation!</p>
+<p>Packages in Python can help make managing lots of different classes and functionality easier. But I want to split my class' methods out of the same file. Can it be done? Of course it can.</p>
+<h2>Setup</h2>
+<p>Note that this works in both Python 2 and 3. My original class looks like the following.</p>
+<div class="highlight"><pre><span class="k">class</span> <span class="n">MyClass:</span>
+    <span class="n">def</span> <span class="n">__init__</span>(<span class="k">self</span>):
+        <span class="k">self</span>.<span class="nb">one</span> = <span class="s">&#39;1&#39;</span>
+        <span class="k">self</span>.<span class="n">two</span> = <span class="s">&#39;2&#39;</span>
+    <span class="n">def</span> <span class="n">hello</span>(<span class="k">self</span>):
+        <span class="nb">print</span>(<span class="s">&#39;hello&#39;</span>)
+    <span class="n">def</span> <span class="n">one_func</span>(<span class="k">self</span>):
+        <span class="nb">print</span>(<span class="k">self</span>.<span class="nb">one</span>)
+    <span class="n">def</span> <span class="n">two_func</span>(<span class="k">self</span>):
+        <span class="nb">print</span>(<span class="k">self</span>.<span class="n">two</span>)
+</pre></div>
+
+
+<p>Stupid, I know. Pretend it is significantly larger. We'll get to a more practical application later.</p>
+<p>We want to have the functions broken out into separate files. We will leave the <code>__init__</code> function alone because moving that would be silly.</p>
+<p>Create a directory with the name of your choice. I will use <code>funcs</code>. Then make a file for each of the functions. For ease of remembering which is which I named the files the same as the functions.</p>
+<div class="highlight"><pre>myclass.py - Our class
+funcs/
+|__ __init__.py
+|__ hello.py
+|__ one_func.py
+|__ two_func.py
+</pre></div>
+
+
+<p>Notice the <code>__init__.py</code>? That isn't for our class' <code>__init__</code> function; it lets Python know that the directory contains a package. Now for the contents of each file.</p>
+<div class="highlight"><pre><span class="c"># __init__.py</span>
+<span class="kn">from</span> <span class="nn">.hello</span> <span class="kn">import</span> <span class="n">hello</span>
+<span class="kn">from</span> <span class="nn">.one_func</span> <span class="kn">import</span> <span class="n">one_func</span>
+<span class="kn">from</span> <span class="nn">.two_func</span> <span class="kn">import</span> <span class="n">two_func</span>
+</pre></div>
+
+
+<p>This sets everything up so we can <code>from funcs import *</code> in our <code>myclass.py</code> file. The files for each of our functions are just a copy of the function's code in the original file. So for example:</p>
+<div class="highlight"><pre># hello.py
+def hello(self):
+    print(&#39;hello&#39;)
+</pre></div>
+
+
+<p>Now that all of our functions are split out into their own files we can finalize our class.</p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">funcs</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">one</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="ow">and</span> <span class="n">e</span> <span class="o">!=</span> <span class="s">&#39;MyClass&#39;</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">MyClass</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+</pre></div>
+
+
+<p>This will cycle through all of the callable objects in the global space and add them as attributes of our class. However, notice that we have to specifically ignore our class as we search for our functions to add. If we imported other functions we would have to ignore them as well, or we could do the imports after our functions are added to the class.</p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">funcs</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+
+<span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">one</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two</span> <span class="o">=</span> <span class="s">&#39;2&#39;</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+<span class="n">ignore</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;MyClass&#39;</span><span class="p">,</span> <span class="s">&#39;join&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="ow">and</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">MyClass</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+</pre></div>
+
+
+<h2>Practical Application</h2>
+<p>Why would you ever want to do this? Say you have a class that may require constant maintenance. Maybe you are adding in new functions or getting rid of deprecated ones. This could help you manage that.</p>
+<p>Say your program requires some sort of command interpreter. Python makes this easy with the <code>cmd</code> module. Commands for your custom interpreter follow a certain format, being that the function names all start with <code>do_</code>. This makes it easier to pick out the right functions to add to our class.</p>
+<div class="highlight"><pre><span class="c"># mycmd.py</span>
+<span class="kn">import</span> <span class="nn">cmd</span>
+<span class="kn">from</span> <span class="nn">funcs</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">MyCmdInterpreter</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">Cmd</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">Cmd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;do_&#39;</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">MyCmdInterpreter</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">MyCmdInterpreter</span><span class="p">()</span><span class="o">.</span><span class="n">cmdloop</span><span class="p">()</span>
+</pre></div>
+
+
+<p>The file structure:</p>
+<div class="highlight"><pre>mycmd.py
+funcs/
+|__ __init__.py
+|__ do_hello.py
+|__ do_something.py
+</pre></div>
+
+
+<div class="highlight"><pre><span class="c"># __init__.py</span>
+<span class="kn">from</span> <span class="nn">.do_hello</span> <span class="kn">import</span> <span class="n">do_hello</span>
+<span class="kn">from</span> <span class="nn">.do_something</span> <span class="kn">import</span> <span class="n">do_something</span>
+</pre></div>
+
+
+<div class="highlight"><pre># do_hello.py
+def do_hello(self):
+    print(&#39;hello!&#39;)
+</pre></div>
+
+
+<div class="highlight"><pre># do_something.py
+def do_something(self, line):
+    print(&#39;doing something with the line&#39;)
+    print(line)
+</pre></div>
+
+
+<p>Now when you run <code>mycmd.py</code> you will have a command interpreter that knows your two commands: hello and something! This is just one application of a basic but useful idea.</p>
+    
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/how-to.html">how-to</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Sean Beck</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+<script language="JavaScript">
+          u = 'seanmckaybeck';
+          s = 'gmail.com';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a><a href="http://twitter.com/seanmckaybeck" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a><a href="https://www.linkedin.com/in/seanmckaybeck" target="_blank"><li><i class="icon-linkedin-sign icon-large" ></i></li></a><a href="https://github.com/ThaWeatherman" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+
+        <a href="https://seanmckaybeck.com/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+  </body>
+</html>
