@@ -1,6 +1,6 @@
 Title: Scrapy: The Basics
 Date: 2015-07-27
-Tags: python, scrapy
+Tags: python, scrapy, web-scraping
 Summary: An overview of how to use Scrapy to crawl a website
 
 
